@@ -15,10 +15,19 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Pull MT4 compiler
+        run: docker pull ghcr.io/d0whc3r/mt4-wine-compiler:master
+
       - name: Compile MQ4
-        uses: uses: docker://ghcr.io/d0whc3r/mt4-wine-compiler:master
-        with:
-          args: .
+        run: |
+          find "$GITHUB_WORKSPACE" -type f -name "*.mq4" -print0 | while IFS= read -r -d '' file; do
+            rel="${file#$GITHUB_WORKSPACE/}"
+            echo "Compiling: $rel"
+            docker run --rm \
+              -v "$GITHUB_WORKSPACE:/home/wine/src" \
+              ghcr.io/d0whc3r/mt4-wine-compiler:master \
+              "/home/wine/src/$rel"
+          done
 
       - name: Collect EX4
         if: always()
