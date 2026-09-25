@@ -16,7 +16,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Compile MQ4
-        uses: docker://d0whc3r/mt4-wine-compiler:latest
+        uses: uses: docker://ghcr.io/d0whc3r/mt4-wine-compiler:master
         with:
           args: .
 
