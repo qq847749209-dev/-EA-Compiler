@@ -20,16 +20,36 @@ jobs:
 
       - name: Compile MQ4
         run: |
-          find "$GITHUB_WORKSPACE" -type f -name "*.mq4" -print0 | while IFS= read -r -d '' file; do
+          set -e
+
+          find "$GITHUB_WORKSPACE" -type f -name "*.mq4" -print0 |
+          while IFS= read -r -d '' file; do
+
             rel="${file#$GITHUB_WORKSPACE/}"
+
+            echo "========================================"
             echo "Compiling: $rel"
+            echo "========================================"
+
             docker run --rm \
+              --entrypoint /usr/bin/xvfb-run \
               -v "$GITHUB_WORKSPACE:/home/wine/src" \
               ghcr.io/d0whc3r/mt4-wine-compiler:master \
+              -a \
+              /home/wine/entrypoint.sh \
               "/home/wine/src/$rel"
+
           done
 
-      - name: Collect EX4
+      - name: Check result
+        if: always()
+        run: |
+          echo "===== EX4 ====="
+          find "$GITHUB_WORKSPACE" -type f -name "*.ex4" -print || true
+          echo "===== LOG ====="
+          find "$GITHUB_WORKSPACE" -type f -name "*.log" -print || true
+
+      - name: Upload EX4
         if: always()
         uses: actions/upload-artifact@v4
         with:
