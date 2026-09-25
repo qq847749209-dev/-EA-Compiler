@@ -1,0 +1,31 @@
+name: MT4 Cloud Compiler
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '**.mq4'
+      - '**.mqh'
+
+jobs:
+  compile:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Compile MQ4
+        uses: docker://d0whc3r/mt4-wine-compiler:latest
+        with:
+          args: .
+
+      - name: Collect EX4
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: MT4-Compiled-Files
+          path: |
+            **/*.ex4
+            **/*.log
+          if-no-files-found: warn
